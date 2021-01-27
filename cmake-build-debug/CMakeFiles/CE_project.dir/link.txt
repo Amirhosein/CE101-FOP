@@ -1,0 +1,3 @@
+"E:\CLion\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\CE_project.dir/objects.a
+C:\TDM-GCC-64\bin\ar.exe cr CMakeFiles\CE_project.dir/objects.a @CMakeFiles\CE_project.dir\objects1.rsp
+C:\TDM-GCC-64\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\CE_project.dir/objects.a -Wl,--no-whole-archive  -o CE_project.exe -Wl,--out-implib,libCE_project.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\CE_project.dir\linklibs.rsp
