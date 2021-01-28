@@ -63,10 +63,10 @@ RM = "E:\CLion\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "F:\Assignments\CE project"
+CMAKE_SOURCE_DIR = "F:\Assignments\1st Term\CE project"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "F:\Assignments\CE project\cmake-build-debug"
+CMAKE_BINARY_DIR = "F:\Assignments\1st Term\CE project\cmake-build-debug"
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -93,14 +93,14 @@ clean: CMakeFiles/CE_project.dir/clean
 CMakeFiles/CE_project.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\CE_project.dir\build.make CMakeFiles/CE_project.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\CE_project.dir\build.make CMakeFiles/CE_project.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="F:\Assignments\CE project\cmake-build-debug\CMakeFiles" --progress-num=1,2 "Built target CE_project"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles" --progress-num=1,2 "Built target CE_project"
 .PHONY : CMakeFiles/CE_project.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/CE_project.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\CE project\cmake-build-debug\CMakeFiles" 2
+	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles" 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/CE_project.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\CE project\cmake-build-debug\CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles" 0
 .PHONY : CMakeFiles/CE_project.dir/rule
 
 # Convenience name for target.

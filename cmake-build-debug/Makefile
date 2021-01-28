@@ -67,10 +67,10 @@ RM = "E:\CLion\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "F:\Assignments\CE project"
+CMAKE_SOURCE_DIR = "F:\Assignments\1st Term\CE project"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "F:\Assignments\CE project\cmake-build-debug"
+CMAKE_BINARY_DIR = "F:\Assignments\1st Term\CE project\cmake-build-debug"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,9 +99,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\CE project\cmake-build-debug\CMakeFiles" "F:\Assignments\CE project\cmake-build-debug\CMakeFiles\progress.marks"
+	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles" "F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles\progress.marks"
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\CE project\cmake-build-debug\CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "F:\Assignments\1st Term\CE project\cmake-build-debug\CMakeFiles" 0
 .PHONY : all
 
 # The main clean target

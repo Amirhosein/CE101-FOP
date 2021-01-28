@@ -1,4 +1,4 @@
-"E:\CLion\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" "F:\Assignments\CE project"
+"E:\CLion\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" "F:\Assignments\1st Term\CE project"
 -- The C compiler identification is GNU 9.2.0
 -- Check for working C compiler: C:/TDM-GCC-64/bin/gcc.exe
 -- Check for working C compiler: C:/TDM-GCC-64/bin/gcc.exe - works
@@ -8,4 +8,4 @@
 -- Detecting C compile features - done
 -- Configuring done
 -- Generating done
--- Build files have been written to: F:/Assignments/CE project/cmake-build-debug
+-- Build files have been written to: F:/Assignments/1st Term/CE project/cmake-build-debug
