@@ -1,7 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
+void Countdown(){
+    for (int i = 3; i > 0; i--) {
+        printf("The Game Will start within %d seconds ...", i);
+        Sleep(1);
+        system("cls");
+    }
+}
+
+
 
 typedef struct MAPindex{
     int x;
@@ -56,7 +70,7 @@ void AddShip(ship * head, ship* new){
     new->prev = curr;
 }
 
-void addressship(int n, ship* head){
+void addressship(int n, ship* head,int map[10][10]){
     ship* curr = NULL;
     int inputx,inputy;
     for(curr = head; curr!=NULL; curr = curr->next){
@@ -68,8 +82,10 @@ void addressship(int n, ship* head){
         scanf("%d,%d", &inputx, &inputy);
         curr->indexes[i].x = inputx -1;
         curr->indexes[i].y = inputy -1;
+        map[inputx -1][inputy -1] = 4;
     }
 }
+
 typedef struct player{
     char Name[100];
     int Coins;
@@ -104,36 +120,145 @@ void Menu(){
 }
 
 void MAPprint(int MAP[10][10]){
+    printf("     ");
+    for (int i = 0; i < 10; i++) {
+        printf("%d    ",i+1);
+    }
+    printf("\n");
     for(int i = 0; i < 10; i++){
+        printf("   ");
         for(int j = 0; j<10; j++){
             printf("|---|");
         }
         printf("\n");
+        if(i+1 >= 10)
+            printf("%d ",i+1);
+        else
+            printf("%d  ",i+1);
         for(int j = 0; j<10; j++){
-            if(MAP[i][j] == 2)
+            if(MAP[j][i] == 2)
                 printf("| E |");
-            else if(MAP[i][j] == 3)
+            else if(MAP[j][i] == 3)
                 printf("| C |");
-            else if(MAP[i][j] == 1)
+            else if(MAP[j][i] == 1)
                 printf("| W |");
+            else if(MAP[j][i] == 4)
+                printf("| S |");
             else
                 printf("|   |");
         }
         printf("\n");
     }
+    printf("   ");
     for(int i = 0; i<10; i++){
         printf("|---|");
     }
     printf("\n");
 }
 
+void RemoveShip(ship* DestroyedShip, ship* head){
+    ship* curr = NULL;
+    DestroyedShip->prev->next = DestroyedShip->next;
+    DestroyedShip->next->prev = DestroyedShip->prev;
+    free(DestroyedShip);
+}
+
+void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2 ){
+    int stat = 1, inputx, inputy;
+    ship* curr;
+
+
+    while(1) {
+        int turn = 1;
+        if (headship1->next == NULL || headship2->next == NULL) {
+            if (headship1->next == NULL) {
+                printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                break;
+            } else {
+                printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                break;
+            }
+        }
+        printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
+        scanf("%d,%d",&inputx , &inputy);
+        for(curr = headship2; curr != NULL;curr = curr->next){
+            for (int i = 0; i < curr->size; i++) {
+                if( curr->indexes[i].x == inputx && curr->indexes[i].y == inputy){
+                    curr->indexes[i].x = -10;
+                    curr->indexes[i].y = -10;
+                    MAP2[inputx][inputy] = 2;
+                }
+
+                // Checking if all indexes of a ship have been destroyed.
+                for (int j = 0; j < curr->size; j++) {
+                    if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
+                        stat = -1;
+                        break;
+                    }
+                }
+                if(stat == 1){
+
+                    // Applying destruction of ship on map
+                    for (int j = 0; j < curr->size; j++)
+                        MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
+                    RemoveShip(curr, headship2);
+
+                }
+            }
+        }
+        if (headship1->next == NULL || headship2->next == NULL) {
+            if (headship1->next == NULL) {
+                printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                break;
+            } else {
+                printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                break;
+            }
+        }
+        MAPprint(MAP2);
+        Sleep(3);
+        turn++;
+        printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
+        scanf("%d,%d",&inputx , &inputy);
+        for(curr = headship1; curr != NULL;curr = curr->next){
+            for (int i = 0; i < curr->size; i++) {
+                if( curr->indexes[i].x == inputx && curr->indexes[i].y == inputy){
+                    curr->indexes[i].x = -10;
+                    curr->indexes[i].y = -10;
+                    MAP1[inputx][inputy] = 2;
+                }
+
+                // Checking if all indexes of a ship have been destroyed.
+                for (int j = 0; j < curr->size; j++) {
+                    if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
+                        stat = -1;
+                        break;
+                    }
+                }
+                if(stat == 1){
+
+                    // Applying destruction of ship on map
+                    for (int j = 0; j < curr->size; j++)
+                        MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
+                    RemoveShip(curr, headship1);
+
+                }
+            }
+        }
+        MAPprint(MAP1);
+        Sleep(3);
+    }
+}
+
+
 int main() {
     int input, inc = 1, shipscount = 10;
     int MAP1[10][10] = { 0 };
     int MAP2[10][10] = { 0 };
+    int tempmap[10][10] = { 0 };
     char inputname[100];
-    // Default Ships for each player declaration
 
+    // Default Ships for each player declaration
     ship* headship1 = NewShip(0);
     AddShip(headship1, NewShip(5));
     AddShip(headship1, NewShip(3));
@@ -250,16 +375,33 @@ int main() {
                 for (int i = 0; i < shipscount; i++) {
                     scanf("%d", &input);
                     printf("Addressing The ship with size: %d\n", input);
-                    addressship(input, headship1);
+                    addressship(input, headship1, tempmap);
+                    system("cls");
+                    MAPprint(tempmap);
                     printf("Done! Please select another ship.\n");
                     availableShipsMenu(headship1);
                 }
                 system("cls");
             }
-
+            int tempmap[10][10] = { 0 };
             printf("Second Player's Arrangement:\n\t1. Auto\n\t2. Manual\n");
             scanf("%d", &input);
             system("cls");
+            if(input == 2){
+                MAPprint(MAP2);
+                availableShipsMenu(headship2);
+                printf("Please select a ship to be addressed.\n");
+                for (int i = 0; i < shipscount; i++) {
+                    scanf("%d", &input);
+                    printf("Addressing The ship with size: %d\n", input);
+                    addressship(input, headship2, tempmap);
+                    printf("Done! Please select another ship.\n");
+                    availableShipsMenu(headship2);
+                }
+                system("cls");
+            }
+            Countdown();
+
 
         }
 
