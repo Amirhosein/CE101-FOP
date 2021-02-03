@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -10,12 +11,10 @@
 void Countdown(){
     for (int i = 3; i > 0; i--) {
         printf("The Game Will start within %d seconds ...", i);
-        Sleep(1);
+        Sleep(1000);
         system("cls");
     }
 }
-
-
 
 typedef struct MAPindex{
     int x;
@@ -163,6 +162,120 @@ void RemoveShip(ship* DestroyedShip, ship* head){
     free(DestroyedShip);
 }
 
+void AutomaticArrangement(int MAP[10][10], ship* head){
+    int direction = 0;
+    int xstart,ystart;
+    ship* curr = NULL;
+    for (curr = head->next; curr != NULL; curr = curr->next) {
+        direction = rand() % 2 + 1;
+        if( direction == 1) {
+            while (1) {
+                srand(time(NULL));
+                int stat = 0;
+                xstart = rand() % 10;
+                ystart = rand() % 10;
+                if (xstart != 0){
+                    for (int i = -1; i < 2; i++) {
+                        if (MAP[xstart - 1][ystart + i] == 4) {
+                            stat = -1;
+                            break;
+                        }
+                    }
+                }
+                if( stat == -1)
+                    continue;
+                if (xstart + curr->size > 9) {
+                    stat = -1;
+                    continue;
+                }
+                for (int i = 0; i < curr->size; i++) {
+                    for (int j = -1; j < 2; j++) {
+                        //printf("%d ",MAP[xstart][ystart + i]);
+                        if (MAP[xstart + i][ystart + j] == 4){
+                            stat = -1;
+                            break;
+                        }
+                    }
+                    //printf("\n");
+                    if( stat == -1)
+                        break;
+                }
+                if( stat == -1)
+                    continue;
+                if (xstart + curr->size - 1 != 9) {
+                    for (int i = -1; i < 2; i++) {
+                        if (MAP[xstart + curr->size][ystart + i] == 4) {
+                            stat = -1;
+                            break;
+                        }
+                    }
+                }
+                if( stat == -1)
+                    continue;
+                else {
+                    for (int i = 0; i < curr->size; i++) {
+                        curr->indexes[i].y = ystart;
+                        curr->indexes[i].x = xstart + i;
+                        MAP[xstart + i][ystart] = 4;
+                    }
+                    break;
+                }
+            }
+
+        }
+        else{
+            while (1) {
+                srand(time(NULL));
+                int stat = 0;
+                xstart = rand() % 10;
+                ystart = rand() % 10;
+                if (ystart != 0){
+                    for (int i = -1; i < 2; i++) {
+                        if (MAP[xstart + i][ystart-1] == 4) {
+                            stat = -1;
+                            break;
+                        }
+                    }
+                }
+                if (ystart + curr->size > 9) {
+                    stat = -1;
+                    continue;
+                }
+                for (int i = 0; i < curr->size; i++) {
+                    for (int j = -1; j < 2; j++) {
+                        if (MAP[xstart + j][ystart + i] == 4){
+                            stat = -1;
+                            break;
+                        }
+                    }
+                    if( stat == -1)
+                        break;
+                }
+                if( stat == -1)
+                    continue;
+                if (ystart + curr->size - 1 != 9) {
+                    for (int i = -1; i < 2; i++) {
+                        if (MAP[xstart + i][ystart + curr->size] == 4) {
+                            stat = -1;
+                            break;
+                        }
+                    }
+                }
+                if( stat == -1)
+                    continue;
+                else {
+                    for (int i = 0; i < curr->size; i++) {
+                        curr->indexes[i].y = ystart + i;
+                        curr->indexes[i].x = xstart;
+                        MAP[xstart][ystart + i] = 4;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
 void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2 ){
     int stat = 1, inputx, inputy;
     ship* curr;
@@ -181,30 +294,42 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         }
         printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
         scanf("%d,%d",&inputx , &inputy);
-        for(curr = headship2; curr != NULL;curr = curr->next){
+        for(curr = headship2->next; curr != NULL;curr = curr->next){
             for (int i = 0; i < curr->size; i++) {
-                if( curr->indexes[i].x == inputx && curr->indexes[i].y == inputy){
+                if( (curr->indexes[i].x == (inputx -1)) && (curr->indexes[i].y == (inputy -1))){
                     curr->indexes[i].x = -10;
                     curr->indexes[i].y = -10;
-                    MAP2[inputx][inputy] = 2;
-                }
+                    MAP2[inputx-1][inputy-1] = 2;
+                    stat = -2;
 
-                // Checking if all indexes of a ship have been destroyed.
-                for (int j = 0; j < curr->size; j++) {
-                    if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
-                        stat = -1;
-                        break;
-                    }
+                    // Checking if all indexes of a ship have been destroyed.
+//                    for (int j = 0; j < curr->size; j++) {
+//                        if((curr->indexes[j].x == -10) && (curr->indexes[j].y == -10)) {
+//                            stat = -1;
+//                        }
+//                        else
+//                            break;
+//                    }
+                    break;
                 }
-                if(stat == 1){
-
+                else{
+                    MAP2[inputx-1][inputy-1] = 1;
+                }
+                if(stat == -1){
                     // Applying destruction of ship on map
                     for (int j = 0; j < curr->size; j++)
                         MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
                     RemoveShip(curr, headship2);
+                    break;
 
                 }
+                else if(stat == -2){
+                    break;
+                }
+
             }
+            if(stat == -2)
+                break;
         }
         if (headship1->next == NULL || headship2->next == NULL) {
             if (headship1->next == NULL) {
@@ -218,23 +343,30 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         MAPprint(MAP2);
         Sleep(3);
         turn++;
+        stat = 1;
         printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
         scanf("%d,%d",&inputx , &inputy);
         for(curr = headship1; curr != NULL;curr = curr->next){
             for (int i = 0; i < curr->size; i++) {
-                if( curr->indexes[i].x == inputx && curr->indexes[i].y == inputy){
+                if( curr->indexes[i].x == inputx-1 && curr->indexes[i].y == inputy-1){
                     curr->indexes[i].x = -10;
                     curr->indexes[i].y = -10;
-                    MAP1[inputx][inputy] = 2;
+                    MAP1[inputx-1][inputy-1] = 2;
+                    stat = -2;
+//                    // Checking if all indexes of a ship have been destroyed.
+//                    for (int j = 0; j < curr->size; j++) {
+//                        if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
+//                            stat = -1;
+//                            break;
+//                        }
+//                    }
+                    break;
+                }
+                else{
+                    MAP1[inputx-1][inputy-1] = 1;
                 }
 
-                // Checking if all indexes of a ship have been destroyed.
-                for (int j = 0; j < curr->size; j++) {
-                    if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
-                        stat = -1;
-                        break;
-                    }
-                }
+
                 if(stat == 1){
 
                     // Applying destruction of ship on map
@@ -243,7 +375,12 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     RemoveShip(curr, headship1);
 
                 }
+                else if(stat == -2){
+                    break;
+                }
             }
+            if(stat == -2)
+                break;
         }
         MAPprint(MAP1);
         Sleep(3);
@@ -367,12 +504,19 @@ int main() {
             printf("First Player's Arrangement:\n\t1. Auto\n\t2. Manual\n");
             scanf("%d", &input);
             system("cls");
+            if(input == 1){
+                AutomaticArrangement(tempmap, headship1);
+                MAPprint(tempmap);
+                Sleep(10000);
+                getchar();
+                system("cls");
+            }
 
             if(input == 2){
                 MAPprint(MAP1);
                 availableShipsMenu(headship1);
                 printf("Please select a ship to be addressed.\n");
-                for (int i = 0; i < shipscount; i++) {
+                for (int i = 0; i < 2; i++) {
                     scanf("%d", &input);
                     printf("Addressing The ship with size: %d\n", input);
                     addressship(input, headship1, tempmap);
@@ -387,11 +531,19 @@ int main() {
             printf("Second Player's Arrangement:\n\t1. Auto\n\t2. Manual\n");
             scanf("%d", &input);
             system("cls");
+
+            if(input == 1){
+                AutomaticArrangement(tempmap, headship2);
+                MAPprint(tempmap);
+                Sleep(3000);
+                getchar();
+                system("cls");
+            }
             if(input == 2){
                 MAPprint(MAP2);
                 availableShipsMenu(headship2);
                 printf("Please select a ship to be addressed.\n");
-                for (int i = 0; i < shipscount; i++) {
+                for (int i = 0; i < 2; i++) {
                     scanf("%d", &input);
                     printf("Addressing The ship with size: %d\n", input);
                     addressship(input, headship2, tempmap);
@@ -401,6 +553,7 @@ int main() {
                 system("cls");
             }
             Countdown();
+            TheGame(MAP1,MAP2,headship1,headship2,player1,player2);
 
 
         }

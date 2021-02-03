@@ -13,6 +13,8 @@ stdlib.h
 -
 string.h
 -
+time.h
+-
 Windows.h
 -
 unistd.h
