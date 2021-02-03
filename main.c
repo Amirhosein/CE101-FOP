@@ -297,20 +297,19 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         for(curr = headship2->next; curr != NULL;curr = curr->next){
             for (int i = 0; i < curr->size; i++) {
                 if( (curr->indexes[i].x == (inputx -1)) && (curr->indexes[i].y == (inputy -1))){
-                    curr->indexes[i].x = -10;
-                    curr->indexes[i].y = -10;
                     MAP2[inputx-1][inputy-1] = 2;
                     stat = -2;
 
-                    // Checking if all indexes of a ship have been destroyed.
-//                    for (int j = 0; j < curr->size; j++) {
-//                        if((curr->indexes[j].x == -10) && (curr->indexes[j].y == -10)) {
-//                            stat = -1;
-//                        }
-//                        else
-//                            break;
-//                    }
-                    break;
+                    //Checking if all indexes of a ship have been destroyed.
+                    for (int j = 0; j < curr->size; j++) {
+                        if(MAP2[curr->indexes[j].x][curr->indexes[j].y] == 2) {
+                            stat = -1;
+                        }
+                        else{
+                            stat = -2;
+                            break;
+                        }
+                    }
                 }
                 else{
                     MAP2[inputx-1][inputy-1] = 1;
@@ -328,7 +327,7 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 }
 
             }
-            if(stat == -2)
+            if(stat == -2 || stat == -1)
                 break;
         }
         if (headship1->next == NULL || headship2->next == NULL) {
@@ -346,7 +345,7 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         stat = 1;
         printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
         scanf("%d,%d",&inputx , &inputy);
-        for(curr = headship1; curr != NULL;curr = curr->next){
+        for(curr = headship1->next; curr != NULL;curr = curr->next){
             for (int i = 0; i < curr->size; i++) {
                 if( curr->indexes[i].x == inputx-1 && curr->indexes[i].y == inputy-1){
                     curr->indexes[i].x = -10;
@@ -367,7 +366,7 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 }
 
 
-                if(stat == 1){
+                if(stat == -1){
 
                     // Applying destruction of ship on map
                     for (int j = 0; j < curr->size; j++)
