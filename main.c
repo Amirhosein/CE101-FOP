@@ -158,7 +158,9 @@ void MAPprint(int MAP[10][10]){
 void RemoveShip(ship* DestroyedShip, ship* head){
     ship* curr = NULL;
     DestroyedShip->prev->next = DestroyedShip->next;
-    DestroyedShip->next->prev = DestroyedShip->prev;
+    if(DestroyedShip->next != NULL){
+        DestroyedShip->next->prev = DestroyedShip->prev;
+    }
     free(DestroyedShip);
 }
 
@@ -295,10 +297,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         if(turn == 1) {
             if (headship1->next == NULL || headship2->next == NULL) {
                 if (headship1->next == NULL) {
-                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
                     break;
                 } else {
-                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
                     break;
                 }
             }
@@ -328,34 +330,63 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                         for (int j = 0; j < curr->size; j++)
                             MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
                         if (curr->size != 1 && (curr->indexes[1].x - curr->indexes[0].x == 1)) {
-                            if ( curr->indexes[0].y != 0 )
-                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++)
+                            if ( curr->indexes[0].y != 0 ) {
+                                if (curr->indexes[0].x != 0)
+                                    MAP2[curr->indexes[0].x - 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].x + curr->size <= 9)
+                                    MAP2[curr->indexes[0].x + curr->size][curr->indexes[0].y - 1] = 1;
+
+                                for (int j = curr->indexes[0].x; j < curr->indexes[0].x + curr->size; j++)
                                     MAP2[j][curr->indexes[0].y - 1] = 1;
+                            }
                             if (curr->indexes[0].x != 0)
                                 MAP2[curr->indexes[0].x - 1][curr->indexes[0].y] = 1;
 
                             if (curr->indexes[0].x != 9)
                                 MAP2[curr->indexes[0].x + curr->size][curr->indexes[0].y] = 1;
 
-                            if(curr->indexes[0].y != 9)
-                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++) {
+                            if(curr->indexes[0].y != 9) {
+                                if (curr->indexes[0].x != 0)
+                                    MAP2[curr->indexes[0].x - 1][curr->indexes[0].y + 1] = 1;
+
+                                if (curr->indexes[0].x + curr->size <= 9)
+                                    MAP2[curr->indexes[0].x + curr->size][curr->indexes[0].y + 1] = 1;
+
+                                for (int j = curr->indexes[0].x; j < curr->indexes[0].x + curr->size; j++) {
                                     MAP2[j][curr->indexes[0].y + 1] = 1;
+                                }
                             }
                         } else {
-                            if ( curr->indexes[0].x != 9)
-                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                            if (curr->indexes[0].x != 9) {
+                                if (curr->indexes[0].y != 0)
+                                    MAP2[curr->indexes[0].x + 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].y + curr->size <= 9)
+                                    MAP2[curr->indexes[0].x + 1][curr->indexes[0].y + curr->size] = 1;
+
+                                for (int j = curr->indexes[0].y; j < curr->indexes[0].y + curr->size; j++)
                                     MAP2[curr->indexes[0].x + 1][j] = 1;
+                            }
 
-                            if (curr->indexes[0].y != 0)
+                            if (curr->indexes[0].y != 0) {
                                 MAP2[curr->indexes[0].x][curr->indexes[0].y - 1] = 1;
+                            }
 
-                            if (curr->indexes[0].y != 9)
+                            if (curr->indexes[0].y != 9) {
                                 MAP2[curr->indexes[0].x][curr->indexes[0].y + curr->size] = 1;
+                            }
 
-                            if(curr->indexes[0].x != 0)
-                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                            if (curr->indexes[0].x != 0) {
+                                if (curr->indexes[0].y != 0)
+                                    MAP2[curr->indexes[0].x - 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].y + curr->size <= 9)
+                                    MAP2[curr->indexes[0].x - 1][curr->indexes[0].y + curr->size] = 1;
+
+                                for (int j = curr->indexes[0].y; j < curr->indexes[0].y + curr->size; j++)
                                     MAP2[curr->indexes[0].x - 1][j] = 1;
-
+                            }
                         }
                         player1->Coins += (5 * (max1))/(curr->size);
                         RemoveShip(curr, headship2);
@@ -371,10 +402,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
             }
             if (headship1->next == NULL || headship2->next == NULL) {
                 if (headship1->next == NULL) {
-                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
                     break;
                 } else {
-                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
                     break;
                 }
             }
@@ -388,10 +419,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
         else {
             if (headship1->next == NULL || headship2->next == NULL) {
                 if (headship1->next == NULL) {
-                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
                     break;
                 } else {
-                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
                     break;
                 }
             }
@@ -421,34 +452,63 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                         for (int j = 0; j < curr->size; j++)
                             MAP1[curr->indexes[j].x][curr->indexes[j].y] = 3;
                         if (curr->size != 1 && (curr->indexes[1].x - curr->indexes[0].x == 1)) {
-                            if ( curr->indexes[0].y != 0 && curr->indexes[0].x != 0)
-                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++)
+                            if ( curr->indexes[0].y != 0 ) {
+                                if (curr->indexes[0].x != 0)
+                                    MAP1[curr->indexes[0].x - 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].x + curr->size <= 9)
+                                    MAP1[curr->indexes[0].x + curr->size][curr->indexes[0].y - 1] = 1;
+
+                                for (int j = curr->indexes[0].x; j < curr->indexes[0].x + curr->size; j++)
                                     MAP1[j][curr->indexes[0].y - 1] = 1;
+                            }
                             if (curr->indexes[0].x != 0)
                                 MAP1[curr->indexes[0].x - 1][curr->indexes[0].y] = 1;
 
                             if (curr->indexes[0].x != 9)
                                 MAP1[curr->indexes[0].x + curr->size][curr->indexes[0].y] = 1;
 
-                            if(curr->indexes[0].y != 9)
-                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++) {
+                            if(curr->indexes[0].y != 9) {
+                                if (curr->indexes[0].x != 0)
+                                    MAP1[curr->indexes[0].x - 1][curr->indexes[0].y + 1] = 1;
+
+                                if (curr->indexes[0].x + curr->size <= 9)
+                                    MAP1[curr->indexes[0].x + curr->size][curr->indexes[0].y + 1] = 1;
+
+                                for (int j = curr->indexes[0].x; j < curr->indexes[0].x + curr->size; j++) {
                                     MAP1[j][curr->indexes[0].y + 1] = 1;
                                 }
+                            }
                         } else {
-                            if ( curr->indexes[0].x != 9)
-                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                            if (curr->indexes[0].x != 9) {
+                                if (curr->indexes[0].y != 0)
+                                    MAP1[curr->indexes[0].x + 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].y + curr->size <= 9)
+                                    MAP1[curr->indexes[0].x + 1][curr->indexes[0].y + curr->size] = 1;
+
+                                for (int j = curr->indexes[0].y; j < curr->indexes[0].y + curr->size; j++)
                                     MAP1[curr->indexes[0].x + 1][j] = 1;
+                            }
 
-                            if (curr->indexes[0].y != 0)
+                            if (curr->indexes[0].y != 0) {
                                 MAP1[curr->indexes[0].x][curr->indexes[0].y - 1] = 1;
+                            }
 
-                            if (curr->indexes[0].y != 9)
+                            if (curr->indexes[0].y != 9) {
                                 MAP1[curr->indexes[0].x][curr->indexes[0].y + curr->size] = 1;
+                            }
 
-                            if(curr->indexes[0].x != 0)
-                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                            if (curr->indexes[0].x != 0) {
+                                if (curr->indexes[0].y != 0)
+                                    MAP1[curr->indexes[0].x - 1][curr->indexes[0].y - 1] = 1;
+
+                                if (curr->indexes[0].y + curr->size <= 9)
+                                    MAP1[curr->indexes[0].x - 1][curr->indexes[0].y + curr->size] = 1;
+
+                                for (int j = curr->indexes[0].y; j < curr->indexes[0].y + curr->size; j++)
                                     MAP1[curr->indexes[0].x - 1][j] = 1;
-
+                            }
                         }
                         player1->Coins += (5 * (max1))/(curr->size);
                         RemoveShip(curr, headship1);
@@ -464,10 +524,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
             }
             if (headship1->next == NULL || headship2->next == NULL) {
                 if (headship1->next == NULL) {
-                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
                     break;
                 } else {
-                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
                     break;
                 }
             }
