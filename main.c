@@ -276,113 +276,206 @@ void AutomaticArrangement(int MAP[10][10], ship* head){
     }
 }
 
-void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2 ){
+void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
     int stat = 1, inputx, inputy;
+    int max1 = 0, max2 = 0;
     ship* curr;
-
+    // Finding Largest size player1's ships
+    for(curr = headship1->next; curr!=NULL;curr = curr->next){
+        if(curr->size > max1)
+            max1 = curr->size;
+    }
+    // Finding Largest size player2's ships
+    for(curr = headship2->next; curr!=NULL;curr = curr->next){
+        if(curr->size > max2)
+            max2 = curr->size;
+    }
 
     while(1) {
-        int turn = 1;
-        if (headship1->next == NULL || headship2->next == NULL) {
-            if (headship1->next == NULL) {
-                printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
-                break;
-            } else {
-                printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
-                break;
+        if(turn == 1) {
+            if (headship1->next == NULL || headship2->next == NULL) {
+                if (headship1->next == NULL) {
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    break;
+                } else {
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    break;
+                }
             }
-        }
-        printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
-        scanf("%d,%d",&inputx , &inputy);
-        for(curr = headship2->next; curr != NULL;curr = curr->next){
-            for (int i = 0; i < curr->size; i++) {
-                if( (curr->indexes[i].x == (inputx -1)) && (curr->indexes[i].y == (inputy -1))){
-                    MAP2[inputx-1][inputy-1] = 2;
-                    stat = -2;
+            printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
+            scanf("%d,%d", &inputx, &inputy);
+            for (curr = headship2->next; curr != NULL; curr = curr->next) {
+                for (int i = 0; i < curr->size; i++) {
+                    if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
+                        MAP2[inputx - 1][inputy - 1] = 2;
+                        stat = -2;
+                        player1->Coins++;
 
-                    //Checking if all indexes of a ship have been destroyed.
-                    for (int j = 0; j < curr->size; j++) {
-                        if(MAP2[curr->indexes[j].x][curr->indexes[j].y] == 2) {
-                            stat = -1;
+                        //Checking if all indexes of a ship have been destroyed.
+                        for (int j = 0; j < curr->size; j++) {
+                            if (MAP2[curr->indexes[j].x][curr->indexes[j].y] == 2) {
+                                stat = -1;
+                            } else {
+                                stat = -2;
+                                break;
+                            }
                         }
-                        else{
-                            stat = -2;
-                            break;
-                        }
+                    } else {
+                        MAP2[inputx - 1][inputy - 1] = 1;
                     }
-                }
-                else{
-                    MAP2[inputx-1][inputy-1] = 1;
-                }
-                if(stat == -1){
-                    // Applying destruction of ship on map
-                    for (int j = 0; j < curr->size; j++)
-                        MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
-                    RemoveShip(curr, headship2);
-                    break;
+                    if (stat == -1) {
+                        // Applying destruction of ship on map
+                        for (int j = 0; j < curr->size; j++)
+                            MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
+                        if (curr->size != 1 && (curr->indexes[1].x - curr->indexes[0].x == 1)) {
+                            if ( curr->indexes[0].y != 0 )
+                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++)
+                                    MAP2[j][curr->indexes[0].y - 1] = 1;
+                            if (curr->indexes[0].x != 0)
+                                MAP2[curr->indexes[0].x - 1][curr->indexes[0].y] = 1;
+
+                            if (curr->indexes[0].x != 9)
+                                MAP2[curr->indexes[0].x + curr->size][curr->indexes[0].y] = 1;
+
+                            if(curr->indexes[0].y != 9)
+                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++) {
+                                    MAP2[j][curr->indexes[0].y + 1] = 1;
+                            }
+                        } else {
+                            if ( curr->indexes[0].x != 9)
+                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                                    MAP2[curr->indexes[0].x + 1][j] = 1;
+
+                            if (curr->indexes[0].y != 0)
+                                MAP2[curr->indexes[0].x][curr->indexes[0].y - 1] = 1;
+
+                            if (curr->indexes[0].y != 9)
+                                MAP2[curr->indexes[0].x][curr->indexes[0].y + curr->size] = 1;
+
+                            if(curr->indexes[0].x != 0)
+                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                                    MAP2[curr->indexes[0].x - 1][j] = 1;
+
+                        }
+                        player1->Coins += (5 * (max1))/(curr->size);
+                        RemoveShip(curr, headship2);
+                        break;
+
+                    } else if (stat == -2) {
+                        break;
+                    }
 
                 }
-                else if(stat == -2){
+                if (stat == -2 || stat == -1)
                     break;
-                }
-
             }
-            if(stat == -2 || stat == -1)
-                break;
-        }
-        if (headship1->next == NULL || headship2->next == NULL) {
-            if (headship1->next == NULL) {
-                printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
-                break;
-            } else {
-                printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
-                break;
-            }
-        }
-        MAPprint(MAP2);
-        Sleep(3);
-        turn++;
-        stat = 1;
-        printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
-        scanf("%d,%d",&inputx , &inputy);
-        for(curr = headship1->next; curr != NULL;curr = curr->next){
-            for (int i = 0; i < curr->size; i++) {
-                if( curr->indexes[i].x == inputx-1 && curr->indexes[i].y == inputy-1){
-                    curr->indexes[i].x = -10;
-                    curr->indexes[i].y = -10;
-                    MAP1[inputx-1][inputy-1] = 2;
-                    stat = -2;
-//                    // Checking if all indexes of a ship have been destroyed.
-//                    for (int j = 0; j < curr->size; j++) {
-//                        if(curr->indexes[j].x != -10 && curr->indexes[j].y != -10) {
-//                            stat = -1;
-//                            break;
-//                        }
-//                    }
+            if (headship1->next == NULL || headship2->next == NULL) {
+                if (headship1->next == NULL) {
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
                     break;
-                }
-                else{
-                    MAP1[inputx-1][inputy-1] = 1;
-                }
-
-
-                if(stat == -1){
-
-                    // Applying destruction of ship on map
-                    for (int j = 0; j < curr->size; j++)
-                        MAP2[curr->indexes[j].x][curr->indexes[j].y] = 3;
-                    RemoveShip(curr, headship1);
-
-                }
-                else if(stat == -2){
+                } else {
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
                     break;
                 }
             }
-            if(stat == -2)
-                break;
+            MAPprint(MAP2);
+            Sleep(3);
+            turn++;
+            if(stat == -1 || stat == -2)
+                turn--;
+            stat = 1;
         }
-        MAPprint(MAP1);
-        Sleep(3);
+        else {
+            if (headship1->next == NULL || headship2->next == NULL) {
+                if (headship1->next == NULL) {
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    break;
+                } else {
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    break;
+                }
+            }
+            printf("This is Player%d's turn.\nPlease enter the coordinates to be fired.\n", turn);
+            scanf("%d,%d", &inputx, &inputy);
+            for (curr = headship1->next; curr != NULL; curr = curr->next) {
+                for (int i = 0; i < curr->size; i++) {
+                    if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
+                        MAP1[inputx - 1][inputy - 1] = 2;
+                        stat = -2;
+                        player2->Coins++;
+
+                        //Checking if all indexes of a ship have been destroyed.
+                        for (int j = 0; j < curr->size; j++) {
+                            if (MAP1[curr->indexes[j].x][curr->indexes[j].y] == 2) {
+                                stat = -1;
+                            } else {
+                                stat = -2;
+                                break;
+                            }
+                        }
+                    } else {
+                        MAP1[inputx - 1][inputy - 1] = 1;
+                    }
+                    if (stat == -1) {
+                        // Applying destruction of ship on map
+                        for (int j = 0; j < curr->size; j++)
+                            MAP1[curr->indexes[j].x][curr->indexes[j].y] = 3;
+                        if (curr->size != 1 && (curr->indexes[1].x - curr->indexes[0].x == 1)) {
+                            if ( curr->indexes[0].y != 0 && curr->indexes[0].x != 0)
+                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++)
+                                    MAP1[j][curr->indexes[0].y - 1] = 1;
+                            if (curr->indexes[0].x != 0)
+                                MAP1[curr->indexes[0].x - 1][curr->indexes[0].y] = 1;
+
+                            if (curr->indexes[0].x != 9)
+                                MAP1[curr->indexes[0].x + curr->size][curr->indexes[0].y] = 1;
+
+                            if(curr->indexes[0].y != 9)
+                                for (int j = curr->indexes[0].x - 1; j < curr->indexes[0].x + curr->size + 1; j++) {
+                                    MAP1[j][curr->indexes[0].y + 1] = 1;
+                                }
+                        } else {
+                            if ( curr->indexes[0].x != 9)
+                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                                    MAP1[curr->indexes[0].x + 1][j] = 1;
+
+                            if (curr->indexes[0].y != 0)
+                                MAP1[curr->indexes[0].x][curr->indexes[0].y - 1] = 1;
+
+                            if (curr->indexes[0].y != 9)
+                                MAP1[curr->indexes[0].x][curr->indexes[0].y + curr->size] = 1;
+
+                            if(curr->indexes[0].x != 0)
+                                for (int j = curr->indexes[0].y - 1; j < curr->indexes[0].y + curr->size + 1; j++)
+                                    MAP1[curr->indexes[0].x - 1][j] = 1;
+
+                        }
+                        player1->Coins += (5 * (max1))/(curr->size);
+                        RemoveShip(curr, headship1);
+                        break;
+
+                    } else if (stat == -2) {
+                        break;
+                    }
+
+                }
+                if (stat == -2 || stat == -1)
+                    break;
+            }
+            if (headship1->next == NULL || headship2->next == NULL) {
+                if (headship1->next == NULL) {
+                    printf("Player %s wins with total coins: %d", player1->Name, player1->Coins);
+                    break;
+                } else {
+                    printf("Player %s wins with total coins: %d", player2->Name, player2->Coins);
+                    break;
+                }
+            }
+            MAPprint(MAP1);
+            if(stat != -1 && stat != -2)
+                turn = 1;
+            stat = 1;
+        }
     }
 }
 
@@ -536,7 +629,7 @@ int main() {
                 MAPprint(tempmap);
                 Sleep(3000);
                 getchar();
-                system("cls");
+                //system("cls");
             }
             if(input == 2){
                 MAPprint(MAP2);
@@ -551,8 +644,8 @@ int main() {
                 }
                 system("cls");
             }
-            Countdown();
-            TheGame(MAP1,MAP2,headship1,headship2,player1,player2);
+            //Countdown();
+            TheGame(MAP1,MAP2,headship1,headship2,player1,player2,1);
 
 
         }
