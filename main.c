@@ -342,12 +342,47 @@ void importplayers(Player * head){
 }
 
 void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn,char name[100]){
+    ship * curr;
+    int size;
     FILE * saves = fopen("data/saves.txt","a");
     fprintf(saves,"%s",name);
     fclose(saves);
     FILE * lastgame = fopen("data/lastgame.txt","w");
     fprintf(lastgame,"%s",name);
     fclose(lastgame);
+    char *filename = calloc(100, 1);
+    sprintf(filename, "data/saves/%s.game",name);
+    FILE * gamesave = fopen(filename, "w");
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            fprintf(gamesave,"%d,",MAP1[i][j]);
+        }
+    }
+    fprintf(gamesave,"\n\n");
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            fprintf(gamesave,"%d,",MAP2[i][j]);
+        }
+    }
+    fprintf(gamesave,"\n\n");
+    for(curr = headship1->next; curr!=NULL;curr = curr->next){
+        fprintf(gamesave,"%d\n",curr->size);
+        for (int i = 0; i < curr->size; i++) {
+            fprintf(gamesave,"(%d,%d)", curr->indexes[i].x,curr->indexes[i].y);
+        }
+    }
+    fprintf(gamesave,"\n\n");
+    for(curr = headship2->next; curr!=NULL;curr = curr->next){
+        fprintf(gamesave,"%d\n",curr->size);
+        for (int i = 0; i < curr->size; i++) {
+            fprintf(gamesave,"(%d,%d)", curr->indexes[i].x,curr->indexes[i].y);
+        }
+    }
+    fprintf(gamesave, "%s\n\n",player1->Name);
+    fprintf(gamesave, "%s\n\n",player2->Name);
+
+    fprintf(gamesave, "%d",turn);
+    fclose(gamesave);
 
 }
 
@@ -389,7 +424,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
             MAPprint(MAP2);
             printf("This is Player %s's turn.\nPlease enter the coordinates to be fired.\n", player1->Name);
             scanf("%d,%d", &inputx, &inputy);
-
+            if(inputx == -1){
+                save(MAP1,MAP2, headship1, headship2,player1,  player2, turn, name);
+                continue;
+            }
             for (curr = headship2->next; curr != NULL; curr = curr->next) {
                 for (int i = 0; i < curr->size; i++) {
                     if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
@@ -516,6 +554,10 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
             MAPprint(MAP1);
             printf("This is Player %s's turn.\nPlease enter the coordinates to be fired.\n", player2->Name);
             scanf("%d,%d", &inputx, &inputy);
+            if(inputx == -1){
+                save(MAP1,MAP2, headship1, headship2,player1,  player2, turn, name);
+                continue;
+            }
             for (curr = headship1->next; curr != NULL; curr = curr->next) {
                 for (int i = 0; i < curr->size; i++) {
                     if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
@@ -937,8 +979,11 @@ int main() {
         scanf("%d",&input);
         system("cls");
         if (input == 1){
+            printf("Please enter name of game:\n");
+            fflush(stdin);
+            gets(gamename);
+            system("cls");
             while(1) {
-                gets(gamename);
 
                 // first player asking //
                 printf("First PLayer: \n\t");
