@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <dir.h>
+#include <sys/stat.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -92,10 +94,10 @@ typedef struct player{
     struct player * prev;
 }Player;
 
-Player * NewPlayer(char name[100]){
+Player * NewPlayer(char name[100],int coin){
     Player* output = (Player *)malloc(sizeof(Player));
     strcpy(output->Name, name);
-    output->Coins = 0;
+    output->Coins = coin;
     output->next = NULL;
     output->prev = NULL;
 }
@@ -276,6 +278,71 @@ void AutomaticArrangement(int MAP[10][10], ship* head){
             }
         }
     }
+}
+
+void CheckDir(){
+
+    struct stat st = {0};
+    if (stat("data", &st) == -1) {
+        mkdir("data");
+    }
+    FILE * fp = fopen("data/lastgame.txt","r");
+    FILE * fp1 = fopen("data/saves.txt","r");
+    FILE * fp2 = fopen("data/users.txt","r");
+
+    if(fp == NULL) {
+        fclose(fp);
+        fp = fopen("data/lastgame.txt", "w");
+        fclose(fp);
+    }
+    if(fp1 == NULL) {
+        fclose(fp1);
+        fp1 = fopen("data/saves.txt", "w");
+        fclose(fp1);
+    }
+    if(fp2 == NULL) {
+        fclose(fp2);
+        fp2 = fopen("data/users.txt", "w");
+        fclose(fp2);
+    }
+    if (stat("data/users", &st) == -1) {
+        mkdir("data/users");
+    }
+    if (stat("data/saves", &st) == -1) {
+        mkdir("data/saves");
+    }
+
+}
+
+void playerfile(char inputname[100]){
+    FILE * users = fopen("data/users.txt","a");
+    fprintf(users,"%s\n",inputname);
+    fclose(users);
+    char *filename = calloc(100, 1);
+    sprintf(filename, "data/users/%s.coin", inputname);
+    FILE *playerfile = fopen(filename, "wb");
+    fprintf(playerfile, "0");
+    fclose(playerfile);
+}
+
+void importplayers(Player * head){
+    int c;
+    char name[100];
+    FILE * playerlist = fopen("data/users.txt" ,"r");
+    while(1){
+        if (feof(playerlist)) break;
+        int coin;
+        fscanf(playerlist,"%s\n",name);
+        char *filename = calloc(100, 1);
+        sprintf(filename, "data/users/%s.coin", name);
+        FILE * player = fopen(name, "rb");
+        fscanf(player,"%d",&coin);
+        AddPlayer(head, NewPlayer(name,coin));
+    }
+}
+
+void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
+
 }
 
 void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
@@ -681,9 +748,15 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 break;
             }
         }
-        srand(time(NULL));
-        inputx = rand() % 10 + 1;
-        inputy = rand() % 10 + 1;
+        while(1) {
+            srand(time(NULL));
+            inputx = rand() % 10 + 1;
+            inputy = rand() % 10 + 1;
+            if (MAP1[inputx][inputy] == 1 || MAP1[inputx][inputy] == 2 || MAP1[inputx][inputy] == 3)
+                continue;
+            else
+                break;
+        }
         for (curr = headship1->next; curr != NULL; curr = curr->next) {
             for (int i = 0; i < curr->size; i++) {
                 if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
@@ -796,7 +869,7 @@ int main() {
     int MAP2[10][10] = { 0 };
     int tempmap[10][10] = { 0 };
     char inputname[100];
-
+    CheckDir();
     // Default Ships for each player declaration
     ship* headship1 = NewShip(0);
     AddShip(headship1, NewShip(5));
@@ -823,15 +896,14 @@ int main() {
     AddShip(headship2, NewShip(1));
     // Players declaration
 
-    Player * head = NewPlayer("head");
+    Player * head = NewPlayer("head", -1);
     Player * player1 = NULL;
     Player * player2 = NULL;
     Player * curr = NULL;
     Player * bot = NULL;
-
-
+    importplayers(head);
     Menu();
-
+    printf("%s\n",head->next->Name);
     while (1)
     {
         scanf("%d",&input);
@@ -865,7 +937,8 @@ int main() {
                     printf("\nPlease enter new user's name: ");
                     fflush(stdin);
                     gets(inputname);
-                    AddPlayer(head, NewPlayer(inputname));
+                    AddPlayer(head, NewPlayer(inputname, 0));
+                    playerfile(inputname);
                     for (curr = head->next; curr->next != NULL; curr = curr->next);
                     player1 = curr;
                     break;
@@ -898,7 +971,8 @@ int main() {
                     printf("\nPlease enter new user's name: ");
                     fflush(stdin);
                     gets(inputname);
-                    AddPlayer(head, NewPlayer(inputname));
+                    AddPlayer(head, NewPlayer(inputname , 0));
+                    playerfile(inputname);
                     for (curr = head; curr->next != NULL; curr = curr->next);
                     player2 = curr;
                     break;
@@ -988,7 +1062,8 @@ int main() {
                     printf("\nPlease enter new user's name: ");
                     fflush(stdin);
                     gets(inputname);
-                    AddPlayer(head, NewPlayer(inputname));
+                    AddPlayer(head, NewPlayer(inputname, 0));
+                    playerfile(inputname);
                     for (curr = head; curr->next != NULL; curr = curr->next);
                     player1 = curr;
                 }
