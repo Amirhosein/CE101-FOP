@@ -335,14 +335,22 @@ void importplayers(Player * head){
         fscanf(playerlist,"%s\n",name);
         char *filename = calloc(100, 1);
         sprintf(filename, "data/users/%s.coin", name);
-        FILE * player = fopen(name, "rb");
+        FILE * player = fopen(filename, "rb");
         fscanf(player,"%d",&coin);
         AddPlayer(head, NewPlayer(name,coin));
     }
 }
 
-void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
+void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn,char name[100]){
 
+}
+
+void saveplayer(Player * target){
+    char* filename = calloc(100, 1);
+    sprintf(filename, "data/users/%s.coin", target->Name);
+    FILE * player = fopen(filename, "wb");
+    fprintf(player,"%d",target->Coins);
+    fclose(player);
 }
 
 void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
@@ -371,8 +379,11 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     break;
                 }
             }
+            system("cls");
+            MAPprint(MAP2);
             printf("This is Player %s's turn.\nPlease enter the coordinates to be fired.\n", player1->Name);
             scanf("%d,%d", &inputx, &inputy);
+
             for (curr = headship2->next; curr != NULL; curr = curr->next) {
                 for (int i = 0; i < curr->size; i++) {
                     if ((curr->indexes[i].x == (inputx - 1)) && (curr->indexes[i].y == (inputy - 1))) {
@@ -456,6 +467,7 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                             }
                         }
                         player1->Coins += (5 * (max1))/(curr->size);
+                        saveplayer(player1);
                         RemoveShip(curr, headship2);
                         break;
 
@@ -476,8 +488,9 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     break;
                 }
             }
+            system("cls");
             MAPprint(MAP2);
-            Sleep(3);
+            Sleep(5000);
             turn++;
             if(stat == -1 || stat == -2)
                 turn--;
@@ -493,6 +506,8 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     break;
                 }
             }
+            system("cls");
+            MAPprint(MAP1);
             printf("This is Player %s's turn.\nPlease enter the coordinates to be fired.\n", player2->Name);
             scanf("%d,%d", &inputx, &inputy);
             for (curr = headship1->next; curr != NULL; curr = curr->next) {
@@ -577,7 +592,8 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                                     MAP1[curr->indexes[0].x - 1][j] = 1;
                             }
                         }
-                        player1->Coins += (5 * (max1))/(curr->size);
+                        player2->Coins += (5 * (max1))/(curr->size);
+                        saveplayer(player2);
                         RemoveShip(curr, headship1);
                         break;
 
@@ -598,10 +614,12 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     break;
                 }
             }
+            system("cls");
             MAPprint(MAP1);
             if(stat != -1 && stat != -2)
                 turn = 1;
             stat = 1;
+            Sleep(5000);
         }
     }
 }
@@ -631,6 +649,8 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 break;
             }
         }
+        MAPprint(MAP2);
+        system("cls");
         printf("This is Player %s 's turn.\nPlease enter the coordinates to be fired.\n", player1->Name);
         scanf("%d,%d", &inputx, &inputy);
         for (curr = headship2->next; curr != NULL; curr = curr->next) {
@@ -716,6 +736,7 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                         }
                     }
                     player1->Coins += (5 * (max1))/(curr->size);
+                    saveplayer(player1);
                     RemoveShip(curr, headship2);
                     break;
 
@@ -869,6 +890,7 @@ int main() {
     int MAP2[10][10] = { 0 };
     int tempmap[10][10] = { 0 };
     char inputname[100];
+    char gamename[100];
     CheckDir();
     // Default Ships for each player declaration
     ship* headship1 = NewShip(0);
@@ -903,13 +925,14 @@ int main() {
     Player * bot = NULL;
     importplayers(head);
     Menu();
-    printf("%s\n",head->next->Name);
     while (1)
     {
         scanf("%d",&input);
         system("cls");
         if (input == 1){
             while(1) {
+
+
                 // first player asking //
                 printf("First PLayer: \n\t");
                 printf("Choose User:\n\t1. Choose from available users\n\t2. New User\n");
@@ -927,7 +950,7 @@ int main() {
 
                         printf("%d. %s with %d coins.\n", inc, curr->Name, curr->Coins);
 
-                    inc = 0;
+                    inc = 1;
                     scanf("%d", &input);
                     system("cls");
                     for (curr = head->next; inc < input; inc++, curr = curr->next);
@@ -961,7 +984,7 @@ int main() {
 
                         printf("%d. %s with %d coins.\n", inc, curr->Name, curr->Coins);
 
-                    inc = 0;
+                    inc = 1;
                     scanf("%d", &input);
                     system("cls");
                     for (curr = head->next; inc < input; inc++, curr = curr->next);
@@ -982,7 +1005,9 @@ int main() {
             scanf("%d", &input);
             system("cls");
             if(input == 1){
+                printf("Arranging Player's Map ...\n\n\nPlease wait.");
                 AutomaticArrangement(tempmap, headship1);
+                system("cls");
                 MAPprint(tempmap);
                 Sleep(10000);
                 getchar();
@@ -1010,11 +1035,13 @@ int main() {
             system("cls");
 
             if(input == 1){
+                printf("Arranging Player's Map ...\n\n\nPlease wait.");
                 AutomaticArrangement(tempmap, headship2);
+                system("cls");
                 MAPprint(tempmap);
                 Sleep(3000);
                 getchar();
-                //system("cls");
+                system("cls");
             }
             if(input == 2){
                 MAPprint(MAP2);
@@ -1053,7 +1080,7 @@ int main() {
 
                         printf("%d. %s with %d coins.\n", inc, curr->Name, curr->Coins);
 
-                    inc = 0;
+                    inc = 1;
                     scanf("%d", &input);
                     system("cls");
                     for (curr = head; inc < input; inc++, curr = curr->next);
