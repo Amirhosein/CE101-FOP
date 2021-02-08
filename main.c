@@ -342,6 +342,12 @@ void importplayers(Player * head){
 }
 
 void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn,char name[100]){
+    FILE * saves = fopen("data/saves.txt","a");
+    fprintf(saves,"%s",name);
+    fclose(saves);
+    FILE * lastgame = fopen("data/lastgame.txt","w");
+    fprintf(lastgame,"%s",name);
+    fclose(lastgame);
 
 }
 
@@ -353,7 +359,7 @@ void saveplayer(Player * target){
     fclose(player);
 }
 
-void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn){
+void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn, char name[100]){
     int stat = 1, inputx, inputy;
     int max1 = 0, max2 = 0;
     ship* curr;
@@ -891,6 +897,7 @@ int main() {
     int tempmap[10][10] = { 0 };
     char inputname[100];
     char gamename[100];
+
     CheckDir();
     // Default Ships for each player declaration
     ship* headship1 = NewShip(0);
@@ -931,7 +938,7 @@ int main() {
         system("cls");
         if (input == 1){
             while(1) {
-
+                gets(gamename);
 
                 // first player asking //
                 printf("First PLayer: \n\t");
@@ -1057,7 +1064,7 @@ int main() {
                 system("cls");
             }
             Countdown();
-            TheGame(MAP1,MAP2,headship1,headship2,player1,player2,1);
+            TheGame(MAP1,MAP2,headship1,headship2,player1,player2,1,gamename);
 
 
         }
