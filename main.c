@@ -343,10 +343,19 @@ void importplayers(Player * head){
 
 void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn,char name[100]){
     ship * curr;
-    int size;
-    FILE * saves = fopen("data/saves.txt","a");
-    fprintf(saves,"%s",name);
-    fclose(saves);
+    int size, stat = 0;
+    FILE * exist = fopen("data/saves.txt", "r");
+    char existname[100];
+    while(fgets(existname, 100, exist)!= NULL)
+        if (strstr(existname, name) != NULL){
+            stat = -1;
+            break;
+        }
+    if(stat != -1) {
+        FILE *saves = fopen("data/saves.txt", "a");
+        fprintf(saves, "%s", name);
+        fclose(saves);
+    }
     FILE * lastgame = fopen("data/lastgame.txt","w");
     fprintf(lastgame,"%s",name);
     fclose(lastgame);
@@ -355,13 +364,13 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
     FILE * gamesave = fopen(filename, "w");
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-            fprintf(gamesave,"%d,",MAP1[i][j]);
+            fprintf(gamesave,"%d,",MAP1[j][i]);
         }
     }
     fprintf(gamesave,"\n\n");
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-            fprintf(gamesave,"%d,",MAP2[i][j]);
+            fprintf(gamesave,"%d,",MAP2[j][i]);
         }
     }
     fprintf(gamesave,"\n\n");
@@ -370,6 +379,7 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
         for (int i = 0; i < curr->size; i++) {
             fprintf(gamesave,"(%d,%d)", curr->indexes[i].x,curr->indexes[i].y);
         }
+        fprintf(gamesave,"\n");
     }
     fprintf(gamesave,"\n\n");
     for(curr = headship2->next; curr!=NULL;curr = curr->next){
@@ -377,12 +387,25 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
         for (int i = 0; i < curr->size; i++) {
             fprintf(gamesave,"(%d,%d)", curr->indexes[i].x,curr->indexes[i].y);
         }
+        fprintf(gamesave,"\n");
     }
     fprintf(gamesave, "%s\n\n",player1->Name);
     fprintf(gamesave, "%s\n\n",player2->Name);
 
     fprintf(gamesave, "%d",turn);
     fclose(gamesave);
+
+}
+
+void load (char name[100], int MAP1[10][10], int MAP2[10][10]){
+    char * filename = calloc(100, 1);
+    sprintf(filename,"data/saves/%s.game",name);
+    FILE * target = fopen(filename, "r");
+    for(int i = 0; i < 10; i++){
+        for (int j = 0; j < 10; j++) {
+            fscanf(target,"%d,",&MAP1[j][i]);
+        }
+    }
 
 }
 
@@ -939,6 +962,7 @@ int main() {
     int tempmap[10][10] = { 0 };
     char inputname[100];
     char gamename[100];
+    char tempname[100];
 
     CheckDir();
     // Default Ships for each player declaration
@@ -1187,7 +1211,9 @@ int main() {
         }
 
         else if(input == 4){
-            // Load last game program will be placed here
+            FILE * lastgame = fopen("data/lastgame.txt", "r");
+            fgets(tempname, 100, lastgame);
+            load(tempname);
         }
 
         else if(input == 5){
