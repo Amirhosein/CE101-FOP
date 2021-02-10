@@ -317,7 +317,7 @@ void CheckDir(){
 
 void playerfile(char inputname[100]){
     FILE * users = fopen("data/users.txt","a");
-    fprintf(users,"%s\n",inputname);
+    fprintf(users,"\n%s\n",inputname);
     fclose(users);
     char *filename = calloc(100, 1);
     sprintf(filename, "data/users/%s.coin", inputname);
@@ -370,7 +370,7 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
         }
     if(stat != -1) {
         FILE *saves = fopen("data/saves.txt", "a");
-        fprintf(saves, "%s\n", name);
+        fprintf(saves, "\n%s", name);
         fclose(saves);
     }
     fclose(exist);
@@ -483,8 +483,15 @@ void load (char name[100], int MAP1[10][10], int MAP2[10][10], ship* headship1, 
             break;
         }
     }
-    fscanf(target, "%s\n", tempname);
+    fscanf(target, "\n%s\n", tempname);
     for(player = head; player!= NULL; player = player->next){
+        if(!strcmp(tempname,"Bot")){
+            strcpy(player2->Name,"Bot");
+            player2->Coins = 0;
+            player2->next = NULL;
+            player2->prev = NULL;
+            break;
+        }
         if(!strcmp(tempname,player->Name)){
             strcpy(player2->Name,player->Name);
             player2->Coins = player->Coins;
@@ -1064,6 +1071,13 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
     }
 }
 
+void RemovePlayer(Player * target){
+    target->prev->next = target->next;
+    if(target->next != NULL)
+        target->next->prev = target->prev;
+    free(target);
+}
+
 int main() {
     int input, inc = 1, shipscount = 10;
     int turn;
@@ -1073,6 +1087,7 @@ int main() {
     char inputname[100];
     char gamename[100];
     char tempname[100];
+    char gamelist[100][100];
 
     CheckDir();
     // Default Ships for each player declaration
@@ -1329,7 +1344,33 @@ int main() {
             Menu();
         }
         else if (input == 3){
-            // Load & save program will be placed here
+            int i = 0;
+            FILE * gamesaves = fopen("data/saves.txt","r");
+            while(!feof(gamesaves)){
+                fscanf(gamesaves,"%s\n",gamelist[i]);
+                i++;
+            }
+            printf("Please enter the game you want to load:\n");
+            for (int j = 0; j < i; j++) {
+                printf("%s\n",gamelist[j]);
+            }
+            printf("Game: ");
+            scanf("%s",tempname);
+            load(tempname,MAP1,MAP2,headship1,headship2,head,player1,player2,&turn);
+            if(!strcmp(player2->Name, bot->Name)) {
+                BotGame(MAP1, MAP2, headship1, headship2, player1, bot, tempname);
+                continue;
+                Sleep(5000);
+                system("cls");
+                Menu();
+            }
+            else {
+                TheGame(MAP1, MAP2, headship1, headship2, player1, player2, turn, tempname);
+                continue;
+                Sleep(5000);
+                system("cls");
+                Menu();
+            }
         }
 
         else if(input == 4){
@@ -1358,10 +1399,29 @@ int main() {
             system("cls");
         }
         else if( input == 6 ){
-            // score board program will be placed here
+            int temp = 0;
+            Player * tempaddressnext = NULL;
+            Player * tempaddressprev = NULL;
+            Player * headtemp = NewPlayer("mashtiabbas",-2);
+            // Initializing temp list to print in order
+            for(curr = head->next; curr!=NULL;curr = curr->next){
+                AddPlayer(headtemp,NewPlayer(curr->Name,curr->Coins));
+            }
+            while(headtemp->next != NULL){
+                for ( curr = headtemp->next; curr!=NULL; curr = curr->next){
+                    if (curr->Coins >= temp){
+                        temp = curr->Coins;
+                        tempaddressnext = curr->next;
+                        tempaddressprev = curr->prev;
+                    }
+                }
+                printf("Player: %s, With %d coins.\n",tempaddressprev->next->Name,tempaddressprev->next->Coins);
+                tempaddressprev->next = tempaddressnext;
+                if (tempaddressnext != NULL)
+                    tempaddressnext->prev = tempaddressprev;
+                temp = 0;
+            }
         }
-
-
 
         if (input == 7)
             break;
