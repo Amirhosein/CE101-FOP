@@ -87,6 +87,7 @@ void addressship(int n, ship* head,int map[10][10]){
     }
 }
 
+
 typedef struct player{
     char Name[100];
     int Coins;
@@ -343,7 +344,16 @@ void importplayers(Player * head){
 
 void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,int turn,char name[100]){
     ship * curr;
+    int shipsNO = -1;
+    // Find number of ships
+    for (curr = headship1; curr!=NULL; curr = curr->next){
+        shipsNO++;
+    }
     int size, stat = 0;
+    Sleep(1);
+    FILE * lastgame = fopen("data/lastgame.txt","w");
+    fprintf(lastgame, "%s", name);
+    fclose(lastgame);
     FILE * exist = fopen("data/saves.txt", "r");
     char existname[100];
     while(fgets(existname, 100, exist)!= NULL)
@@ -356,9 +366,7 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
         fprintf(saves, "%s", name);
         fclose(saves);
     }
-    FILE * lastgame = fopen("data/lastgame.txt","w");
-    fprintf(lastgame,"%s",name);
-    fclose(lastgame);
+    fclose(exist);
     char *filename = calloc(100, 1);
     sprintf(filename, "data/saves/%s.game",name);
     FILE * gamesave = fopen(filename, "w");
@@ -374,6 +382,7 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
         }
     }
     fprintf(gamesave,"\n\n");
+    fprintf(gamesave,"%d\n\n",shipsNO);
     for(curr = headship1->next; curr!=NULL;curr = curr->next){
         fprintf(gamesave,"%d\n",curr->size);
         for (int i = 0; i < curr->size; i++) {
@@ -397,7 +406,11 @@ void save (int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, 
 
 }
 
-void load (char name[100], int MAP1[10][10], int MAP2[10][10]){
+void load (char name[100], int MAP1[10][10], int MAP2[10][10], ship* headship1, ship* headship2,Player* head,Player* player1,Player* player2,int *turn){
+    ship* curr;
+    Player* player;
+    int tempsize, shipsNO;
+    char tempname[100];
     char * filename = calloc(100, 1);
     sprintf(filename,"data/saves/%s.game",name);
     FILE * target = fopen(filename, "r");
@@ -406,7 +419,69 @@ void load (char name[100], int MAP1[10][10], int MAP2[10][10]){
             fscanf(target,"%d,",&MAP1[j][i]);
         }
     }
+    fseek(target, 2, SEEK_CUR);
+    for(int i = 0; i < 10; i++){
+        for (int j = 0; j < 10; j++) {
+            fscanf(target,"%d,",&MAP2[j][i]);
+        }
+    }
 
+    //Removing existing ships. ( Usually means default ships )
+    for (curr = headship1->next; curr->next != NULL; curr = curr->next);
+    for (;curr != headship1; curr = curr->prev){
+        RemoveShip(curr,headship1);
+    }
+    for (curr = headship2->next; curr->next != NULL; curr = curr->next);
+    for (;curr != headship2; curr = curr->prev){
+        RemoveShip(curr,headship2);
+    }
+
+    fseek(target, 2, SEEK_CUR);
+    fscanf(target,"%d\n\n", &shipsNO);
+    for (int i = 0; i < shipsNO; i++) {
+        fscanf(target, "%d\n",&tempsize);
+        AddShip(headship1, NewShip(tempsize));
+        for(curr = headship1; curr!=NULL; curr = curr->next){
+            if ( curr->size == tempsize && curr->indexes[0].x == -2)
+                break;
+        }
+        for (int j = 0; j < tempsize; j++) {
+            fscanf(target, "(%d,%d)\n",&curr->indexes[j].x,&curr->indexes[j].y);
+        }
+    }
+    for (int i = 0; i < shipsNO; i++) {
+        fscanf(target, "%d\n",&tempsize);
+        AddShip(headship2, NewShip(tempsize));
+        for(curr = headship2; curr!=NULL; curr = curr->next){
+            if ( curr->size == tempsize && curr->indexes[0].x == -2)
+                break;
+        }
+        for (int j = 0; j < tempsize; j++) {
+            fscanf(target, "(%d,%d)\n",&curr->indexes[j].x,&curr->indexes[j].y);
+        }
+    }
+    fscanf(target, "%s\n", tempname);
+    for(player = head; player!= NULL; player = player->next){
+        if(!strcmp(tempname,player->Name)){
+            strcpy(player1->Name,player->Name);
+            player1->Coins = player->Coins;
+            player1->next = player->next;
+            player1->prev = player->prev;
+            break;
+        }
+    }
+    fscanf(target, "%s\n", tempname);
+    for(player = head; player!= NULL; player = player->next){
+        if(!strcmp(tempname,player->Name)){
+            strcpy(player2->Name,player->Name);
+            player2->Coins = player->Coins;
+            player2->next = player->next;
+            player2->prev = player->prev;
+            break;
+        }
+    }
+    fscanf(target, "%d", turn);
+    fclose(target);
 }
 
 void saveplayer(Player * target){
@@ -957,6 +1032,7 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
 
 int main() {
     int input, inc = 1, shipscount = 10;
+    int turn;
     int MAP1[10][10] = { 0 };
     int MAP2[10][10] = { 0 };
     int tempmap[10][10] = { 0 };
@@ -992,10 +1068,10 @@ int main() {
     // Players declaration
 
     Player * head = NewPlayer("head", -1);
-    Player * player1 = NULL;
-    Player * player2 = NULL;
+    Player * player1 = (Player*)malloc(sizeof(Player));
+    Player * player2 = (Player*)malloc(sizeof(Player));
     Player * curr = NULL;
-    Player * bot = NULL;
+    Player * bot = NewPlayer("Bot",0);
     importplayers(head);
     Menu();
     while (1)
@@ -1210,18 +1286,21 @@ int main() {
             // Load & save program will be placed here
         }
 
-        else if(input == 4){
+        else if(input != 4){
             FILE * lastgame = fopen("data/lastgame.txt", "r");
-            fgets(tempname, 100, lastgame);
-            load(tempname);
+            fscanf(lastgame,"%s", tempname);
+            fclose(lastgame);
+            load(tempname,MAP1,MAP2,headship1,headship2,head,player1,player2,&turn);
+            if(!strcmp(player2->Name, bot->Name))
+                BotGame(MAP1,MAP2,headship1,headship2,player1,bot);
+            else
+                TheGame(MAP1,MAP2,headship1,headship2,player1,player2,turn,tempname);
         }
-
         else if(input == 5){
             printf("1. Ships\n2. Map Size\n3. Theme\n");
             scanf("%d", &input);
             system("cls");
         }
-
         else if( input == 6 ){
             // score board program will be placed here
         }
