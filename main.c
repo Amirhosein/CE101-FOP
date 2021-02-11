@@ -792,8 +792,11 @@ void TheGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
 
 void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2, Player* player1, Player* player2,char name[100]){
     int inputx, inputy;
+    int count = 0;
     int stat = 1;
+    mapindex temp;
     int turn = 1;
+    int smart = 0;
     int max1 = 0, max2 = 0;
     ship* curr;
     // Finding Largest size player1's ships
@@ -936,6 +939,10 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 }
             }
             turn++;
+            system("cls");
+            MAPprint(MAP2);
+            Sleep(3000);
+            system("cls");
         } else {
             stat = 1;
             if (headship1->next == NULL || headship2->next == NULL) {
@@ -947,14 +954,92 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                     break;
                 }
             }
-            while (1) {
-                srand(time(NULL));
-                inputx = rand() % 10 + 1;
-                inputy = rand() % 10 + 1;
-                if (MAP1[inputx][inputy] == 1 || MAP1[inputx][inputy] == 2 || MAP1[inputx][inputy] == 3)
-                    continue;
-                else
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    if (MAP1[j][i] == 2) {
+                        smart = 1;
+                        temp.x = j;
+                        temp.y = i;
+                        break;
+                    }
+                }
+                if (smart == 1)
                     break;
+            }
+            if (smart == 1) {
+                if (temp.x != 9 && (MAP1[temp.x + 1][temp.y] == 2)) {
+                    if (temp.x != 0 && MAP1[temp.x - 1][temp.y] != 1) {
+                        inputx = temp.x - 1 + 1;
+                        inputy = temp.y + 1;
+                    } else if (temp.x == 0 || MAP1[temp.x - 1][temp.y] == 1) {
+                        for (; MAP1[temp.x + 1][temp.y] == 2; temp.x = temp.x + 1);
+                        inputx = temp.x + 1 + 1;
+                        inputy = temp.y + 1;
+                    }
+                }
+                else if (temp.y != 9 && (MAP1[temp.x][temp.y + 1] == 2)) {
+                    if (temp.y != 0 && MAP1[temp.x][temp.y - 1] != 1) {
+                        inputx = temp.x + 1;
+                        inputy = temp.y - 1 + 1;
+                    } else if (temp.x == 0 || MAP1[temp.x][temp.y - 1] == 1) {
+                        for (; MAP1[temp.x][temp.y + 1] == 2; temp.y = temp.y + 1);
+                        inputx = temp.x + 1;
+                        inputy = temp.y + 1 + 1;
+                    }
+                }
+                else{
+                    if (temp.x != 0 && MAP1[temp.x - 1][temp.y] != 1 ){
+                        inputx = temp.x - 1 + 1;
+                        inputy = temp.y + 1;
+                    }
+                    else if (temp.x != 9 && MAP1[temp.x + 1][temp.y] != 1){
+                        inputx = temp.x + 1 + 1;
+                        inputy = temp.y + 1;
+                    }
+                    else if(temp.y!=0 && MAP1[temp.x][temp.y - 1] != 1){
+                        inputx = temp.x + 1;
+                        inputy = temp.y - 1 + 1;
+                    }
+                    else if(temp.y != 9 && MAP1[temp.x][temp.y + 1] != 1){
+                        inputx = temp.x + 1;
+                        inputy = temp.y + 1 + 1;
+                    }
+                }
+                smart = 0;
+            } else {
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        if (MAP1[j][i] == 0)
+                            count++;
+                    }
+                }
+                if (count <= 15) {
+                    for (int i = 0; i < 10; i++) {
+                        int tempstat = 0 ;
+                        for (int j = 0; j < 10; j++) {
+                            if (MAP1[j][i] == 0) {
+                                inputx = j + 1;
+                                inputy = i + 1;
+                                tempstat = 1;
+                                break;
+                            }
+                        }
+                        if(tempstat == 1)
+                            break;
+                    }
+
+                } else {
+                    while (1) {
+                        srand(time(NULL));
+                        inputx = rand() % 10 + 1;
+                        inputy = rand() % 10 + 1;
+                        if (MAP1[inputx][inputy] == 1 || MAP1[inputx][inputy] == 2 || MAP1[inputx][inputy] == 3)
+                            continue;
+                        else
+                            break;
+                    }
+                }
+                count = 0;
             }
             for (curr = headship1->next; curr != NULL; curr = curr->next) {
                 for (int i = 0; i < curr->size; i++) {
@@ -1060,9 +1145,6 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
                 turn++;
             stat = 1;
             turn--;
-            system("cls");
-            MAPprint(MAP2);
-            Sleep(3000);
             system("cls");
             MAPprint(MAP1);
             Sleep(3000);
@@ -1337,11 +1419,11 @@ int main() {
             printf("Arranging Bot's Map ...\n\n\nPlease wait.");
             AutomaticArrangement(tempmap, headship2);
             system("cls");
-            BotGame(MAP1,MAP2,headship1,headship2,player1,bot,tempname);
-            continue;
+            BotGame(MAP1,MAP2,headship1,headship2,player1,bot,gamename);
             Sleep(5000);
             system("cls");
             Menu();
+            continue;
         }
         else if (input == 3){
             int i = 0;
@@ -1359,17 +1441,17 @@ int main() {
             load(tempname,MAP1,MAP2,headship1,headship2,head,player1,player2,&turn);
             if(!strcmp(player2->Name, bot->Name)) {
                 BotGame(MAP1, MAP2, headship1, headship2, player1, bot, tempname);
-                continue;
                 Sleep(5000);
                 system("cls");
                 Menu();
+                continue;
             }
             else {
                 TheGame(MAP1, MAP2, headship1, headship2, player1, player2, turn, tempname);
-                continue;
                 Sleep(5000);
                 system("cls");
                 Menu();
+                continue;
             }
         }
 
@@ -1380,17 +1462,17 @@ int main() {
             load(tempname,MAP1,MAP2,headship1,headship2,head,player1,player2,&turn);
             if(!strcmp(player2->Name, bot->Name)) {
                 BotGame(MAP1, MAP2, headship1, headship2, player1, bot, tempname);
-                continue;
                 Sleep(5000);
                 system("cls");
                 Menu();
+                continue;
             }
             else {
                 TheGame(MAP1, MAP2, headship1, headship2, player1, player2, turn, tempname);
-                continue;
                 Sleep(5000);
                 system("cls");
                 Menu();
+                continue;
             }
         }
         else if(input == 5){
