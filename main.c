@@ -124,36 +124,86 @@ void Menu(){
 void MAPprint(int MAP[10][10]){
     printf("     ");
     for (int i = 0; i < 10; i++) {
+        printf("\e[1;37m");
         printf("%d    ",i+1);
+        printf("\e[0m");
     }
     printf("\n");
     for(int i = 0; i < 10; i++){
         printf("   ");
         for(int j = 0; j<10; j++){
+            printf("\e[1;37m");
             printf("|---|");
+            printf("\e[0m");
         }
         printf("\n");
-        if(i+1 >= 10)
-            printf("%d ",i+1);
-        else
-            printf("%d  ",i+1);
+        if(i+1 >= 10) {
+            printf("\e[1;37m");
+            printf("%d ", i + 1);
+            printf("\e[0m");
+        }else {
+            printf("\e[1;37m");
+            printf("%d  ", i + 1);
+            printf("\e[0m");
+        }
         for(int j = 0; j<10; j++){
-            if(MAP[j][i] == 2)
-                printf("| E |");
-            else if(MAP[j][i] == 3)
-                printf("| C |");
-            else if(MAP[j][i] == 1)
-                printf("| W |");
-            else if(MAP[j][i] == 4)
-                printf("| S |");
-            else
+            if(MAP[j][i] == 2) {
+                printf("\e[1;37m");
+                printf("| ");
+                printf("\e[0m");
+                printf("\e[1;33m");
+                printf("E");
+                printf("\e[0m");
+                printf("\e[1;37m");
+                printf(" |");
+                printf("\e[0m");
+            }
+            else if(MAP[j][i] == 3) {
+                printf("\e[1;37m");
+                printf("| ");
+                printf("\e[0m");
+                printf("\e[1;31m");
+                printf("C");
+                printf("\e[0m");
+                printf("\e[1;37m");
+                printf(" |");
+                printf("\e[0m");
+            }
+            else if(MAP[j][i] == 1) {
+                printf("\e[1;37m");
+                printf("| ");
+                printf("\e[0m");
+                printf("\e[1;36m");
+                printf("W");
+                printf("\e[0m");
+                printf("\e[1;37m");
+                printf(" |");
+                printf("\e[0m");
+            }
+            else if(MAP[j][i] == 4) {
+                printf("\e[1;37m");
+                printf("| ");
+                printf("\e[0m");
+                printf("\e[1;32m");
+                printf("S");
+                printf("\e[0m");
+                printf("\e[1;37m");
+                printf(" |");
+                printf("\e[0m");
+            }
+            else {
+                printf("\e[1;37m");
                 printf("|   |");
+                printf("\e[0m");
+            }
         }
         printf("\n");
     }
     printf("   ");
     for(int i = 0; i<10; i++){
+        printf("\e[1;37m");
         printf("|---|");
+        printf("\e[0m");
     }
     printf("\n");
 }
@@ -1153,13 +1203,6 @@ void BotGame(int MAP1[10][10],int MAP2[10][10], ship* headship1, ship* headship2
     }
 }
 
-void RemovePlayer(Player * target){
-    target->prev->next = target->next;
-    if(target->next != NULL)
-        target->next->prev = target->prev;
-    free(target);
-}
-
 int main() {
     int input, inc = 1, shipscount = 10;
     int turn;
@@ -1210,6 +1253,7 @@ int main() {
         scanf("%d",&input);
         system("cls");
         if (input == 1){
+            printf("\e[1;37m");
             printf("Please enter name of game:\n");
             fflush(stdin);
             gets(gamename);
@@ -1349,6 +1393,7 @@ int main() {
         }
 
         else if(input == 2) {
+            printf("\e[1;37m");
             printf("Please enter name of game:\n");
             fflush(stdin);
             gets(gamename);
@@ -1426,6 +1471,7 @@ int main() {
             continue;
         }
         else if (input == 3){
+            printf("\e[1;37m");
             int i = 0;
             FILE * gamesaves = fopen("data/saves.txt","r");
             while(!feof(gamesaves)){
@@ -1456,6 +1502,7 @@ int main() {
         }
 
         else if(input == 4){
+            printf("\e[1;37m");
             FILE * lastgame = fopen("data/lastgame.txt", "r");
             fscanf(lastgame,"%s", tempname);
             fclose(lastgame);
@@ -1476,11 +1523,13 @@ int main() {
             }
         }
         else if(input == 5){
+            printf("\e[1;37m");
             printf("1. Ships\n2. Map Size\n3. Theme\n");
             scanf("%d", &input);
             system("cls");
         }
         else if( input == 6 ){
+            printf("\e[1;37m");
             int temp = 0;
             Player * tempaddressnext = NULL;
             Player * tempaddressprev = NULL;
