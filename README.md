@@ -2,8 +2,7 @@
 It's a repository for my Fundamentals of Programming Course @ Uni.
 
 # How to run:
-At first make sure that `gcc` is installed and configured in your system environment PATH.
-Then follow these commands:
+At first make sure that `gcc` is installed and configured in your system environment PATH. Then follow these commands:
 
 `gcc ./main.c`
 
