@@ -1,2 +1,2 @@
-# FOP-Uni-Fall99
+# FOP-Fall99
 It's a repository for my Fundamentals of Programming Course @ Uni.
