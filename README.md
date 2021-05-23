@@ -9,4 +9,4 @@ At first make sure that `gcc` is installed and configured in your system environ
 In Windows: `./a.exe`
 In Unix-based OS: `./a.out`
 
-**Note**: Some commands like `sleep` and `System("cls")` is specially for Windows, if you are using a Unix-based OS, make sure to fix these commands before run for better experience.
+**Note**: Some commands like `sleep` and `System("cls")` are specially for Windows, if you are using a Unix-based OS, make sure to fix these commands before run for better experience.
